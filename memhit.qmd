@@ -39,18 +39,106 @@ id_mappings <- read_csv(
   file.path(Sys.getenv("HOME"), "Desktop", "id_mappings_recent.csv")
 )
 
+# Ensure all ID columns are character
 id_mappings <- id_mappings |>
-  mutate(as.character(participant_id))
+  mutate(
+    participant_id = as.character(participant_id),
+    prolific_pid = as.character(prolific_pid)
+  )
 
 memhit_task <- memhit_task |>
-  filter(participant %in% id_mappings$prolific_pid |
-         participant %in% id_mappings$participant_id) |>
-  rename(prolific_pid = participant)
+  mutate(
+    participant = as.character(participant)
+  )
+
+MTQ <- MTQ |>
+  mutate(participant = as.character(participant))
+
+id_lookup <- bind_rows(
+  id_mappings |>
+    transmute(
+      original_id = participant_id,
+      prolific_pid = prolific_pid
+    ),
+  id_mappings |>
+    transmute(
+      original_id = prolific_pid,
+      prolific_pid = prolific_pid
+    )
+) |>
+  filter(!is.na(original_id)) |>
+  distinct()
+
+memhit_task <- memhit_task |>
+  left_join(
+    id_lookup,
+    by = c("participant" = "original_id")
+  ) |>
+  filter(!is.na(prolific_pid))
+
+MTQ <- MTQ |>
+  left_join(
+    id_lookup,
+    by = c("participant" = "original_id")
+  ) |>
+  filter(!is.na(prolific_pid))
 
 merged_data <- memhit_task |>
-  left_join(
+  inner_join(
     MTQ,
-    by = c("prolific_pid" = "participant")
+    by = "prolific_pid",
+    suffix = c("_memhit", "_MTQ")
   )
+
+```
+
+```{r}
+
+merged_data <- merged_data |>
+  select(contains("QID6_"),
+         prolific_pid,
+         Progress,
+         `Duration (in seconds)`,
+         Finished,
+         expCondition,
+         boxType,
+         outcomeType,
+         outcome,
+         rewardAmount,
+         rewardType,
+         total_earnings_final,
+         avg_report_accuracy,
+         hitTask_duration,
+         rating_pink,
+         rating_blue,
+         rating_yellow,
+         globalTrial,
+         firstPressTime
+         ) |>
+  mutate(
+  across(
+    starts_with("QID6_"),
+    ~ .x |>
+      as.character() |>
+      na_if("n/a (Prefer not to answer)") |>
+      stringr::str_extract("\\d+") |>
+      as.numeric()
+  )
+) |>
+  filter(!is.na(prolific_pid))
+
+merged_data <- merged_data |>
+  mutate(personal_mastery = QID6_20 + QID6_14 + QID6_39 + QID6_9 + 
+           QID6_21 + QID6_46 - QID6_40 + QID6_15 + QID6_2 + QID6_28,
+         competitive_excellence = QID6_41 + QID6_16 + QID6_29 + QID6_23 +
+           QID6_35 + QID6_3 + QID6_4 - QID6_17 + QID6_10 + QID6_30 - QID6_11 - QID6_24,
+         motivation_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 - QID6_44 - QID6_12 +
+           QID6_47 + QID6_37 + QID6_49)
+
+merged_data <- merged_data |>
+  mutate(expCondition = na_if(expCondition, "")) |>
+  group_by(prolific_pid) |>
+  fill(expCondition, .direction = "down") |>
+  ungroup() 
 ```
 
