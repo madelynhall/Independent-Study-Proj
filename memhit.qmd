@@ -1,0 +1,56 @@
+---
+title: "memhit"
+format: html
+---
+
+```{r}
+#| label: merging-dfs
+
+library(ggplot2)
+library(knitr)
+library(purrr)
+library(tidyr)
+library(tidyverse)
+
+data_folder <- file.path(
+  Sys.getenv("HOME"),
+  "Desktop",
+  "data 2"
+)
+
+csv_files <- list.files(
+  path = data_folder,
+  pattern = "\\.csv$",
+  full.names = TRUE,
+  recursive = TRUE,
+  ignore.case = TRUE
+)
+
+memhit_task <- map_dfr(
+  csv_files,
+  ~ read_csv(.x, col_types = cols(.default = col_character()))
+)
+
+MTQ <- read_csv(
+  file.path(Sys.getenv("HOME"), "Desktop", "MTQ.csv")
+)
+
+id_mappings <- read_csv(
+  file.path(Sys.getenv("HOME"), "Desktop", "id_mappings_recent.csv")
+)
+
+id_mappings <- id_mappings |>
+  mutate(as.character(participant_id))
+
+memhit_task <- memhit_task |>
+  filter(participant %in% id_mappings$prolific_pid |
+         participant %in% id_mappings$participant_id) |>
+  rename(prolific_pid = participant)
+
+merged_data <- memhit_task |>
+  left_join(
+    MTQ,
+    by = c("prolific_pid" = "participant")
+  )
+```
+
