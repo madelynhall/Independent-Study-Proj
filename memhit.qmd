@@ -11,6 +11,7 @@ library(knitr)
 library(purrr)
 library(tidyr)
 library(tidyverse)
+library(patchwork)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
@@ -115,7 +116,8 @@ merged_data <- merged_data |>
          rating_blue,
          rating_yellow,
          globalTrial,
-         firstPressTime
+         firstPressTime,
+         press_count
          ) |>
   mutate(
   across(
@@ -134,7 +136,7 @@ merged_data <- merged_data |>
            QID6_21 + QID6_46 - QID6_40 + QID6_15 + QID6_2 + QID6_28,
          competitive_excellence = QID6_41 + QID6_16 + QID6_29 + QID6_23 +
            QID6_35 + QID6_3 + QID6_4 - QID6_17 + QID6_10 + QID6_30 - QID6_11 - QID6_24,
-         motivation_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 - QID6_44 - QID6_12 +
+         achievement_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 - QID6_44 - QID6_12 +
            QID6_47 + QID6_37 + QID6_49)
 
 merged_data <- merged_data |>
@@ -142,10 +144,52 @@ merged_data <- merged_data |>
   group_by(prolific_pid) |>
   fill(expCondition, .direction = "down") |>
   ungroup() |>
-  mutate(EV = as.numeric(rewardAmount) * as.numeric(rewardProb))
+  mutate(EV = as.numeric(rewardAmount) * as.numeric(rewardProb)) |>
+  mutate(
+    reward_level = case_when(
+      rewardType %in% "L" & rewardProb == 0.3 ~ "low_p30",
+      rewardType %in% "H" & rewardProb == 0.3 ~ "high_p30",
+      rewardType %in% "L" & rewardProb == 0.7 ~ "low_p70",
+      rewardType %in% "H" & rewardProb == 0.7 ~ "high_p70",
+      rewardType %in% "L" & rewardProb == 1 ~ "low_p100",
+      rewardType %in% "H" & rewardProb == 1 ~ "high_p100",
+    ))
 ```
 
 ```{r}
+#| label: EDA
+#| warning: FALSE
+
+plot_data <- merged_data |>
+  group_by(prolific_pid) |>
+  mutate(prop_press = as.numeric(press_count)/65) |>
+  mutate(
+    competitive_excellence = first(competitive_excellence),
+    personal_mastery = first(personal_mastery),
+    achievement_anxiety = first(achievement_anxiety)) |>
+  ungroup() |>
+  mutate(mtq_total = achievement_anxiety + personal_mastery + competitive_excellence)
+
+#would be nice to stratify this by experimental group once we get more data
+plot_data |>
+  filter(!is.na(reward_level)) |>
+  ggplot(aes(x = personal_mastery, y = prop_press, color = reward_level)) +
+  geom_smooth(method = "lm", se = FALSE)
+
+plot_data |>
+  filter(!is.na(reward_level)) |>
+  ggplot(aes(x = competitive_excellence, y = prop_press, color = reward_level)) +
+  geom_smooth(method = "lm", se = FALSE)
+
+plot_data |>
+  filter(!is.na(reward_level)) |>
+  ggplot(aes(x = achievement_anxiety, y = prop_press, color = reward_level)) +
+  geom_smooth(method = "lm", se = FALSE)
+
+plot_data |>
+  filter(!is.na(reward_level)) |>
+  ggplot(aes(x = mtq_total, y = prop_press, color = reward_level)) +
+  geom_smooth(method = "lm", se = FALSE)
 
 ```
 
