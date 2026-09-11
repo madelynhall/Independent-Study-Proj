@@ -93,6 +93,7 @@ merged_data <- memhit_task |>
 ```
 
 ```{r}
+#| label: cleaning-master-df
 
 merged_data <- merged_data |>
   select(contains("QID6_"),
@@ -106,6 +107,7 @@ merged_data <- merged_data |>
          outcome,
          rewardAmount,
          rewardType,
+         rewardProb,
          total_earnings_final,
          avg_report_accuracy,
          hitTask_duration,
@@ -139,6 +141,11 @@ merged_data <- merged_data |>
   mutate(expCondition = na_if(expCondition, "")) |>
   group_by(prolific_pid) |>
   fill(expCondition, .direction = "down") |>
-  ungroup() 
+  ungroup() |>
+  mutate(EV = as.numeric(rewardAmount) * as.numeric(rewardProb))
+```
+
+```{r}
+
 ```
 
