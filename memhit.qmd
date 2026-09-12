@@ -12,6 +12,10 @@ library(purrr)
 library(tidyr)
 library(tidyverse)
 library(patchwork)
+library(tibble)
+library(broom)
+library(broom.mixed)
+library(lme4)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
@@ -65,31 +69,36 @@ id_lookup <- bind_rows(
     transmute(
       original_id = prolific_pid,
       prolific_pid = prolific_pid
-    )
-) |>
-  filter(!is.na(original_id)) |>
-  distinct()
+    )) 
 
-memhit_task <- memhit_task |>
+memhit_updated <- memhit_task |>
+  mutate(participant = as.character(participant)) |>
   left_join(
     id_lookup,
     by = c("participant" = "original_id")
   ) |>
-  filter(!is.na(prolific_pid))
+  mutate(
+    prolific_pid = coalesce(prolific_pid, participant)
+  ) |>
+  select(-participant)
 
-MTQ <- MTQ |>
+MTQ_updated <- MTQ |>
+  mutate(participant = as.character(participant)) |>
   left_join(
     id_lookup,
     by = c("participant" = "original_id")
   ) |>
-  filter(!is.na(prolific_pid))
+  mutate(
+    prolific_pid = coalesce(prolific_pid, participant)
+  ) |>
+  select(-participant)
 
-merged_data <- memhit_task |>
-  inner_join(
-    MTQ,
-    by = "prolific_pid",
-    suffix = c("_memhit", "_MTQ")
-  )
+merged_data <- inner_join(
+  memhit_updated,
+  MTQ_updated,
+  by = "prolific_pid",
+  suffix = c("_memhit", "_MTQ")
+)
 
 ```
 
@@ -133,10 +142,10 @@ merged_data <- merged_data |>
 
 merged_data <- merged_data |>
   mutate(personal_mastery = QID6_20 + QID6_14 + QID6_39 + QID6_9 + 
-           QID6_21 + QID6_46 - QID6_40 + QID6_15 + QID6_2 + QID6_28,
+           QID6_21 + QID6_46 + (6 - QID6_40) + QID6_15 + QID6_2 + QID6_28,
          competitive_excellence = QID6_41 + QID6_16 + QID6_29 + QID6_23 +
-           QID6_35 + QID6_3 + QID6_4 - QID6_17 + QID6_10 + QID6_30 - QID6_11 - QID6_24,
-         achievement_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 - QID6_44 - QID6_12 +
+           QID6_35 + QID6_3 + QID6_4 + (6 - QID6_17) + QID6_10 + QID6_30 + (6 -   QID6_11) + (6 - QID6_24),
+         achievement_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 + (6 - QID6_44) + (6 - QID6_12) +
            QID6_47 + QID6_37 + QID6_49)
 
 merged_data <- merged_data |>
@@ -191,5 +200,40 @@ plot_data |>
   ggplot(aes(x = mtq_total, y = prop_press, color = reward_level)) +
   geom_smooth(method = "lm", se = FALSE)
 
+```
+```{r}
+#| label: significance
+
+model_ce <-  lm(
+  prop_press ~ competitive_excellence * reward_level,
+  data = plot_data
+)
+tidy(model_ce) |>
+  kable(digits = 3)
+
+model_pm <-  lm(
+  prop_press ~ personal_mastery * reward_level,
+  data = plot_data
+)
+tidy(model_pm) |>
+  kable(digits = 3)
+
+model_aa <-  lm(
+  prop_press ~ achievement_anxiety * reward_level,
+  data = plot_data
+)
+tidy(model_aa) |>
+  kable(digits = 3)
+
+model_aa2 <-  lm(
+  prop_press ~ achievement_anxiety * reward_level,
+  data = plot_data
+)
+tidy(model_aa) |>
+  kable(digits = 3)
+
+```
+
+```{r}
 ```
 
