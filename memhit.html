@@ -317,8 +317,47 @@ chr (2): participant_id, prolific_pid
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#would be nice to stratify this by experimental group once we get more data</span></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> personal_mastery, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">reward_level =</span> <span class="fu">factor</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>      reward_level,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p70"</span>,  <span class="st">"low_p70"</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p30"</span>,  <span class="st">"low_p30"</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">|&gt;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> personal_mastery,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -329,7 +368,11 @@ chr (2): participant_id, prolific_pid
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> competitive_excellence, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -340,7 +383,11 @@ chr (2): participant_id, prolific_pid
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> achievement_anxiety, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -351,7 +398,11 @@ chr (2): participant_id, prolific_pid
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mtq_total, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

@@ -182,23 +182,74 @@ plot_data <- merged_data |>
 #would be nice to stratify this by experimental group once we get more data
 plot_data |>
   filter(!is.na(reward_level)) |>
-  ggplot(aes(x = personal_mastery, y = prop_press, color = reward_level)) +
-  geom_smooth(method = "lm", se = FALSE)
+  mutate(
+    reward_level = factor(
+      reward_level,
+      levels = c(
+        "high_p100", "low_p100",
+        "high_p70",  "low_p70",
+        "high_p30",  "low_p30"
+      )
+    )) |>
+  ggplot(
+    aes(
+      x = personal_mastery,
+      y = prop_press,
+      group = reward_level,
+      color = reward_level,
+      linetype = reward_level
+    )
+  ) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "blue",
+      low_p100 = "blue",
+      high_p70 = "green4",
+      low_p70 = "green4",
+      high_p30 = "goldenrod3",
+      low_p30 = "goldenrod3"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "solid",
+      low_p100 = "dashed",
+      high_p70 = "solid",
+      low_p70 = "dashed",
+      high_p30 = "solid",
+      low_p30 = "dashed"
+    )
+  ) 
 
 plot_data |>
   filter(!is.na(reward_level)) |>
   ggplot(aes(x = competitive_excellence, y = prop_press, color = reward_level)) +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_discrete(
+    breaks = c("high_p100", "low_p100", "high_p70", 
+               "low_p70", "high_p30", "low_p30")
+  )
 
 plot_data |>
   filter(!is.na(reward_level)) |>
   ggplot(aes(x = achievement_anxiety, y = prop_press, color = reward_level)) +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_discrete(
+    breaks = c("high_p100", "low_p100", "high_p70", 
+               "low_p70", "high_p30", "low_p30")
+  )
 
 plot_data |>
   filter(!is.na(reward_level)) |>
   ggplot(aes(x = mtq_total, y = prop_press, color = reward_level)) +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_discrete(
+    breaks = c("high_p100", "low_p100", "high_p70", 
+               "low_p70", "high_p30", "low_p30")
+  )
 
 ```
 ```{r}
