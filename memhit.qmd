@@ -16,6 +16,7 @@ library(tibble)
 library(broom)
 library(broom.mixed)
 library(lmerTest)
+library(ggcorrplot)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
@@ -465,4 +466,24 @@ model_aa2 <-  lmer(
 
 ```
 
+```{r}
+#| label: correlation-matrix
+
+trait_cor <- mtq_scoring |>
+  select(
+    prolific_pid,
+    competitive_excellence,
+    personal_mastery,
+    achievement_anxiety
+  ) |>
+  distinct(prolific_pid, .keep_all = TRUE) |>
+  select(-prolific_pid)
+
+corr_matrix_mtq <- cor(trait_cor, use = "complete.obs")
+
+ggcorrplot(corr_matrix_mtq,
+           lab = TRUE,
+           colors = c("#efefef", "#9f9f9f", "#5f5f5f"),
+           ggtheme = theme_minimal())
+```
 
