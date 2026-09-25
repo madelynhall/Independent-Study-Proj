@@ -187,30 +187,31 @@ chr (2): participant_id, prolific_pid
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>MTQ <span class="ot">&lt;-</span> MTQ <span class="sc">|&gt;</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">participant =</span> <span class="fu">as.character</span>(participant))</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>id_lookup <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  id_mappings <span class="sc">|&gt;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">original_id =</span> participant_id,</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">prolific_pid =</span> prolific_pid</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  id_mappings <span class="sc">|&gt;</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">original_id =</span> prolific_pid,</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">prolific_pid =</span> prolific_pid</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    )) </span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>memhit_updated <span class="ot">&lt;-</span> memhit_task <span class="sc">|&gt;</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">participant =</span> <span class="fu">as.character</span>(participant)) <span class="sc">|&gt;</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    id_lookup,</span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"participant"</span> <span class="ot">=</span> <span class="st">"original_id"</span>)</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">prolific_pid =</span> <span class="fu">coalesce</span>(prolific_pid, participant)</span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>participant)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">participant =</span> <span class="fu">as.character</span>(participant)) <span class="sc">|&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">participant =</span> <span class="fu">str_remove</span>(participant, <span class="st">"^0"</span>))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>id_lookup <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  id_mappings <span class="sc">|&gt;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">original_id =</span> participant_id,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">prolific_pid =</span> prolific_pid</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  id_mappings <span class="sc">|&gt;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">original_id =</span> prolific_pid,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">prolific_pid =</span> prolific_pid</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    )) </span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>memhit_updated <span class="ot">&lt;-</span> memhit_task <span class="sc">|&gt;</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">participant =</span> <span class="fu">as.character</span>(participant)) <span class="sc">|&gt;</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    id_lookup,</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"participant"</span> <span class="ot">=</span> <span class="st">"original_id"</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">prolific_pid =</span> <span class="fu">coalesce</span>(prolific_pid, participant)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>participant)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in left_join(mutate(memhit_task, participant = as.character(participant)), : Detected an unexpected many-to-many relationship between `x` and `y`.
 ℹ Row 801 of `x` matches multiple rows in `y`.
@@ -265,99 +266,121 @@ chr (2): participant_id, prolific_pid
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>         rating_yellow,</span>
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>         globalTrial,</span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>         firstPressTime,</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>         press_count</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">|&gt;</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">across</span>(</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">starts_with</span>(<span class="st">"QID6_"</span>),</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> .x <span class="sc">|&gt;</span></span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>() <span class="sc">|&gt;</span></span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">na_if</span>(<span class="st">"n/a (Prefer not to answer)"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>      stringr<span class="sc">::</span><span class="fu">str_extract</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">d+"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.numeric</span>()</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(prolific_pid))</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">personal_mastery =</span> QID6_20 <span class="sc">+</span> QID6_14 <span class="sc">+</span> QID6_39 <span class="sc">+</span> QID6_9 <span class="sc">+</span> </span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>           QID6_21 <span class="sc">+</span> QID6_46 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_40) <span class="sc">+</span> QID6_15 <span class="sc">+</span> QID6_2 <span class="sc">+</span> QID6_28,</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>         <span class="at">competitive_excellence =</span> QID6_41 <span class="sc">+</span> QID6_16 <span class="sc">+</span> QID6_29 <span class="sc">+</span> QID6_23 <span class="sc">+</span></span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>           QID6_35 <span class="sc">+</span> QID6_3 <span class="sc">+</span> QID6_4 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_17) <span class="sc">+</span> QID6_10 <span class="sc">+</span> QID6_30 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span>   QID6_11) <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_24),</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>         <span class="at">achievement_anxiety =</span> QID6_42 <span class="sc">+</span> QID6_50 <span class="sc">+</span> QID6_19 <span class="sc">+</span> QID6_48 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_44) <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_12) <span class="sc">+</span></span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>           QID6_47 <span class="sc">+</span> QID6_37 <span class="sc">+</span> QID6_49)</span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">expCondition =</span> <span class="fu">na_if</span>(expCondition, <span class="st">""</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(prolific_pid) <span class="sc">|&gt;</span></span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fill</span>(expCondition, <span class="at">.direction =</span> <span class="st">"down"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">EV =</span> <span class="fu">as.numeric</span>(rewardAmount) <span class="sc">*</span> <span class="fu">as.numeric</span>(rewardProb)) <span class="sc">|&gt;</span></span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">reward_level =</span> <span class="fu">case_when</span>(</span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.3</span> <span class="sc">~</span> <span class="st">"low_p30"</span>,</span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.3</span> <span class="sc">~</span> <span class="st">"high_p30"</span>,</span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.7</span> <span class="sc">~</span> <span class="st">"low_p70"</span>,</span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.7</span> <span class="sc">~</span> <span class="st">"high_p70"</span>,</span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"low_p100"</span>,</span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"high_p100"</span>,</span>
-<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    ))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>         press_count,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>         press_threshold</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">|&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">across</span>(</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">starts_with</span>(<span class="st">"QID6_"</span>),</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> .x <span class="sc">|&gt;</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">na_if</span>(<span class="st">"n/a (Prefer not to answer)"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>      stringr<span class="sc">::</span><span class="fu">str_extract</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">d+"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.numeric</span>()</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(prolific_pid))</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">personal_mastery =</span> QID6_20 <span class="sc">+</span> QID6_14 <span class="sc">+</span> QID6_39 <span class="sc">+</span> QID6_9 <span class="sc">+</span> </span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>           QID6_21 <span class="sc">+</span> QID6_46 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_40) <span class="sc">+</span> QID6_15 <span class="sc">+</span> QID6_2 <span class="sc">+</span> QID6_28,</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>         <span class="at">competitive_excellence =</span> QID6_41 <span class="sc">+</span> QID6_16 <span class="sc">+</span> QID6_29 <span class="sc">+</span> QID6_23 <span class="sc">+</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>           QID6_35 <span class="sc">+</span> QID6_3 <span class="sc">+</span> QID6_4 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_17) <span class="sc">+</span> QID6_10 <span class="sc">+</span> QID6_30 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span>   QID6_11) <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_24),</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">achievement_anxiety =</span> QID6_42 <span class="sc">+</span> QID6_50 <span class="sc">+</span> QID6_19 <span class="sc">+</span> QID6_48 <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_44) <span class="sc">+</span> (<span class="dv">6</span> <span class="sc">-</span> QID6_12) <span class="sc">+</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>           QID6_47 <span class="sc">+</span> QID6_37 <span class="sc">+</span> QID6_49,</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">mtq_total =</span> achievement_anxiety <span class="sc">+</span> personal_mastery <span class="sc">+</span> competitive_excellence) </span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">expCondition =</span> <span class="fu">na_if</span>(expCondition, <span class="st">""</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(prolific_pid) <span class="sc">|&gt;</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fill</span>(expCondition, <span class="at">.direction =</span> <span class="st">"down"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">EV =</span> <span class="fu">as.numeric</span>(rewardAmount) <span class="sc">*</span> <span class="fu">as.numeric</span>(rewardProb)) <span class="sc">|&gt;</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">reward_level =</span> <span class="fu">case_when</span>(</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.3</span> <span class="sc">~</span> <span class="st">"low_p30"</span>,</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.3</span> <span class="sc">~</span> <span class="st">"high_p30"</span>,</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.7</span> <span class="sc">~</span> <span class="st">"low_p70"</span>,</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="fl">0.7</span> <span class="sc">~</span> <span class="st">"high_p70"</span>,</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"L"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"low_p100"</span>,</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>      rewardType <span class="sc">%in%</span> <span class="st">"H"</span> <span class="sc">&amp;</span> rewardProb <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"high_p100"</span>,</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(prolific_pid) <span class="sc">|&gt;</span></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">press_threshold =</span> <span class="fu">first</span>(press_threshold[<span class="sc">!</span><span class="fu">is.na</span>(press_threshold)])</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(prolific_pid) <span class="sc">|&gt;</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop_press =</span> <span class="fu">as.numeric</span>(press_count)<span class="sc">/</span><span class="dv">65</span>) <span class="sc">|&gt;</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">competitive_excellence =</span> <span class="fu">first</span>(competitive_excellence),</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">personal_mastery =</span> <span class="fu">first</span>(personal_mastery),</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">achievement_anxiety =</span> <span class="fu">first</span>(achievement_anxiety)) <span class="sc">|&gt;</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mtq_total =</span> achievement_anxiety <span class="sc">+</span> personal_mastery <span class="sc">+</span> competitive_excellence)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#would be nice to stratify this by experimental group once we get more data</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">reward_level =</span> <span class="fu">factor</span>(</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>      reward_level,</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>,</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p70"</span>,  <span class="st">"low_p70"</span>,</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p30"</span>,  <span class="st">"low_p30"</span></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">|&gt;</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> personal_mastery,</span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
-<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
-<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mtq_scoring <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(personal_mastery,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>         competitive_excellence,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>         achievement_anxiety,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>         mtq_total,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>         prolific_pid) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(personal_mastery <span class="sc">|</span> competitive_excellence <span class="sc">|</span> achievement_anxiety))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(prolific_pid) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop_press =</span> <span class="fu">as.numeric</span>(press_count)<span class="sc">/</span><span class="fu">as.numeric</span>(press_threshold)) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">competitive_excellence =</span> <span class="fu">first</span>(competitive_excellence),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">personal_mastery =</span> <span class="fu">first</span>(personal_mastery),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">achievement_anxiety =</span> <span class="fu">first</span>(achievement_anxiety)) <span class="sc">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#would be nice to stratify this by experimental group once we get more data</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> plot_data <span class="sc">|&gt;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">reward_level =</span> <span class="fu">factor</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      reward_level,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p70"</span>,  <span class="st">"low_p70"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high_p30"</span>,  <span class="st">"low_p30"</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> personal_mastery,</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -365,14 +388,40 @@ chr (2): participant_id, prolific_pid
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> competitive_excellence, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> competitive_excellence, </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -380,14 +429,40 @@ chr (2): participant_id, prolific_pid
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> achievement_anxiety, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> achievement_anxiety, </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -395,14 +470,40 @@ chr (2): participant_id, prolific_pid
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(reward_level)) <span class="sc">|&gt;</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mtq_total, <span class="at">y =</span> prop_press, <span class="at">color =</span> reward_level)) <span class="sc">+</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_discrete</span>(</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"high_p100"</span>, <span class="st">"low_p100"</span>, <span class="st">"high_p70"</span>, </span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"low_p70"</span>, <span class="st">"high_p30"</span>, <span class="st">"low_p30"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> mtq_total, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> prop_press,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> reward_level,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> reward_level,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> reward_level</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"blue"</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"green4"</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"goldenrod3"</span>,</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"goldenrod3"</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Reward level"</span>,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p100 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p100 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p70 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p70 =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">high_p30 =</span> <span class="st">"solid"</span>,</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">low_p30 =</span> <span class="st">"dashed"</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -412,12 +513,12 @@ chr (2): participant_id, prolific_pid
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model_ce <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> competitive_excellence <span class="sc">*</span> reward_level,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_ce) <span class="sc">|&gt;</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_ce <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> competitive_excellence <span class="sc">*</span> reward_level,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_ce) <span class="sc">|&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -439,97 +540,97 @@ chr (2): participant_id, prolific_pid
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">1.033</td>
-<td style="text-align: right;">0.024</td>
-<td style="text-align: right;">43.066</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">38.443</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">competitive_excellence</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.710</td>
-<td style="text-align: right;">0.478</td>
+<td style="text-align: right;">-0.129</td>
+<td style="text-align: right;">0.897</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">reward_levelhigh_p30</td>
+<td style="text-align: left;">reward_levellow_p100</td>
+<td style="text-align: right;">0.011</td>
 <td style="text-align: right;">0.037</td>
-<td style="text-align: right;">0.034</td>
-<td style="text-align: right;">1.087</td>
-<td style="text-align: right;">0.277</td>
+<td style="text-align: right;">0.303</td>
+<td style="text-align: right;">0.762</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">reward_levelhigh_p70</td>
 <td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.034</td>
-<td style="text-align: right;">0.194</td>
-<td style="text-align: right;">0.846</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">reward_levellow_p100</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.034</td>
-<td style="text-align: right;">0.031</td>
-<td style="text-align: right;">0.975</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">reward_levellow_p30</td>
-<td style="text-align: right;">-0.064</td>
-<td style="text-align: right;">0.034</td>
-<td style="text-align: right;">-1.880</td>
-<td style="text-align: right;">0.060</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">0.198</td>
+<td style="text-align: right;">0.843</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">reward_levellow_p70</td>
-<td style="text-align: right;">-0.004</td>
-<td style="text-align: right;">0.034</td>
-<td style="text-align: right;">-0.111</td>
-<td style="text-align: right;">0.911</td>
+<td style="text-align: right;">-0.001</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">-0.020</td>
+<td style="text-align: right;">0.984</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">competitive_excellence:reward_levelhigh_p30</td>
-<td style="text-align: right;">-0.002</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-2.796</td>
-<td style="text-align: right;">0.005</td>
+<td style="text-align: left;">reward_levelhigh_p30</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">1.315</td>
+<td style="text-align: right;">0.189</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">competitive_excellence:reward_levelhigh_p70</td>
-<td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-0.246</td>
-<td style="text-align: right;">0.805</td>
+<td style="text-align: left;">reward_levellow_p30</td>
+<td style="text-align: right;">-0.075</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">-2.048</td>
+<td style="text-align: right;">0.041</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">competitive_excellence:reward_levellow_p100</td>
 <td style="text-align: right;">-0.001</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-1.126</td>
-<td style="text-align: right;">0.260</td>
+<td style="text-align: right;">-1.217</td>
+<td style="text-align: right;">0.224</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">competitive_excellence:reward_levellow_p30</td>
-<td style="text-align: right;">-0.002</td>
+<td style="text-align: left;">competitive_excellence:reward_levelhigh_p70</td>
+<td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-2.720</td>
-<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">-0.244</td>
+<td style="text-align: right;">0.807</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">competitive_excellence:reward_levellow_p70</td>
 <td style="text-align: right;">-0.002</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-2.200</td>
+<td style="text-align: right;">-2.194</td>
 <td style="text-align: right;">0.028</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">competitive_excellence:reward_levelhigh_p30</td>
+<td style="text-align: right;">-0.003</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-3.106</td>
+<td style="text-align: right;">0.002</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">competitive_excellence:reward_levellow_p30</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-2.635</td>
+<td style="text-align: right;">0.008</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_pm <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> personal_mastery <span class="sc">*</span> reward_level,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_pm) <span class="sc">|&gt;</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model_pm <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> personal_mastery <span class="sc">*</span> reward_level,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_pm) <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -551,204 +652,92 @@ chr (2): participant_id, prolific_pid
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">1.184</td>
+<td style="text-align: right;">1.001</td>
 <td style="text-align: right;">0.051</td>
-<td style="text-align: right;">23.179</td>
+<td style="text-align: right;">19.569</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">personal_mastery</td>
-<td style="text-align: right;">-0.003</td>
+<td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-2.676</td>
-<td style="text-align: right;">0.007</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">reward_levelhigh_p30</td>
-<td style="text-align: right;">0.031</td>
-<td style="text-align: right;">0.072</td>
-<td style="text-align: right;">0.429</td>
-<td style="text-align: right;">0.668</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">reward_levelhigh_p70</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.072</td>
-<td style="text-align: right;">0.126</td>
-<td style="text-align: right;">0.900</td>
+<td style="text-align: right;">-0.079</td>
+<td style="text-align: right;">0.937</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">reward_levellow_p100</td>
-<td style="text-align: right;">-0.108</td>
+<td style="text-align: right;">-0.093</td>
 <td style="text-align: right;">0.072</td>
-<td style="text-align: right;">-1.501</td>
-<td style="text-align: right;">0.133</td>
+<td style="text-align: right;">-1.279</td>
+<td style="text-align: right;">0.201</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">reward_levellow_p30</td>
-<td style="text-align: right;">-0.447</td>
+<td style="text-align: left;">reward_levelhigh_p70</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.072</td>
-<td style="text-align: right;">-6.183</td>
-<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.136</td>
+<td style="text-align: right;">0.892</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">reward_levellow_p70</td>
-<td style="text-align: right;">-0.328</td>
+<td style="text-align: right;">-0.308</td>
 <td style="text-align: right;">0.072</td>
-<td style="text-align: right;">-4.537</td>
+<td style="text-align: right;">-4.258</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">personal_mastery:reward_levelhigh_p30</td>
-<td style="text-align: right;">-0.002</td>
+<td style="text-align: left;">reward_levelhigh_p30</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">0.072</td>
+<td style="text-align: right;">0.690</td>
+<td style="text-align: right;">0.490</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reward_levellow_p30</td>
+<td style="text-align: right;">-0.390</td>
+<td style="text-align: right;">0.072</td>
+<td style="text-align: right;">-5.396</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">personal_mastery:reward_levellow_p100</td>
+<td style="text-align: right;">0.001</td>
 <td style="text-align: right;">0.002</td>
-<td style="text-align: right;">-1.174</td>
-<td style="text-align: right;">0.241</td>
+<td style="text-align: right;">0.855</td>
+<td style="text-align: right;">0.393</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">personal_mastery:reward_levelhigh_p70</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.002</td>
-<td style="text-align: right;">-0.146</td>
-<td style="text-align: right;">0.884</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">personal_mastery:reward_levellow_p100</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">1.028</td>
-<td style="text-align: right;">0.304</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">personal_mastery:reward_levellow_p30</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">4.140</td>
-<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">-0.155</td>
+<td style="text-align: right;">0.876</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">personal_mastery:reward_levellow_p70</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.002</td>
-<td style="text-align: right;">3.549</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model_aa <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> achievement_anxiety <span class="sc">*</span> reward_level,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_aa) <span class="sc">|&gt;</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 11%">
-<col style="width: 12%">
-<col style="width: 12%">
-<col style="width: 10%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">term</th>
-<th style="text-align: right;">estimate</th>
-<th style="text-align: right;">std.error</th>
-<th style="text-align: right;">statistic</th>
-<th style="text-align: right;">p.value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">1.034</td>
-<td style="text-align: right;">0.018</td>
-<td style="text-align: right;">57.001</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">achievement_anxiety</td>
+<td style="text-align: right;">3.227</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.929</td>
-<td style="text-align: right;">0.353</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">reward_levelhigh_p30</td>
-<td style="text-align: right;">-0.106</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-4.115</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">reward_levelhigh_p70</td>
-<td style="text-align: right;">-0.002</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-0.059</td>
-<td style="text-align: right;">0.953</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">reward_levellow_p100</td>
-<td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.553</td>
-<td style="text-align: right;">0.580</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">reward_levellow_p30</td>
-<td style="text-align: right;">-0.124</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-4.820</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">reward_levellow_p70</td>
-<td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.194</td>
-<td style="text-align: right;">0.846</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p30</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">2.275</td>
-<td style="text-align: right;">0.023</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p70</td>
-<td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.993</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">achievement_anxiety:reward_levellow_p100</td>
-<td style="text-align: right;">-0.002</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-2.126</td>
-<td style="text-align: right;">0.034</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">achievement_anxiety:reward_levellow_p30</td>
-<td style="text-align: right;">-0.001</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-1.183</td>
-<td style="text-align: right;">0.237</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">achievement_anxiety:reward_levellow_p70</td>
+<td style="text-align: left;">personal_mastery:reward_levelhigh_p30</td>
 <td style="text-align: right;">-0.003</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-3.425</td>
-<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">-1.543</td>
+<td style="text-align: right;">0.123</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">personal_mastery:reward_levellow_p30</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">3.117</td>
+<td style="text-align: right;">0.002</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model_aa2 <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model_aa <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> achievement_anxiety <span class="sc">*</span> reward_level,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -775,66 +764,52 @@ chr (2): participant_id, prolific_pid
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">1.034</td>
+<td style="text-align: right;">0.994</td>
 <td style="text-align: right;">0.018</td>
-<td style="text-align: right;">57.001</td>
+<td style="text-align: right;">55.453</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">achievement_anxiety</td>
+<td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.929</td>
-<td style="text-align: right;">0.353</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.854</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">reward_levelhigh_p30</td>
-<td style="text-align: right;">-0.106</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-4.115</td>
-<td style="text-align: right;">0.000</td>
+<td style="text-align: left;">reward_levellow_p100</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.661</td>
+<td style="text-align: right;">0.509</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">reward_levelhigh_p70</td>
 <td style="text-align: right;">-0.002</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-0.059</td>
-<td style="text-align: right;">0.953</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">reward_levellow_p100</td>
-<td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.553</td>
-<td style="text-align: right;">0.580</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">reward_levellow_p30</td>
-<td style="text-align: right;">-0.124</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-4.820</td>
-<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-0.080</td>
+<td style="text-align: right;">0.936</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">reward_levellow_p70</td>
-<td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.194</td>
-<td style="text-align: right;">0.846</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.220</td>
+<td style="text-align: right;">0.826</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p30</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">2.275</td>
-<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">reward_levelhigh_p30</td>
+<td style="text-align: right;">-0.103</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-4.077</td>
+<td style="text-align: right;">0.000</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p70</td>
+<td style="text-align: left;">reward_levellow_p30</td>
+<td style="text-align: right;">-0.119</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-4.711</td>
 <td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.993</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">achievement_anxiety:reward_levellow_p100</td>
@@ -844,22 +819,155 @@ chr (2): participant_id, prolific_pid
 <td style="text-align: right;">0.034</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">achievement_anxiety:reward_levellow_p30</td>
-<td style="text-align: right;">-0.001</td>
+<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p70</td>
+<td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-1.183</td>
-<td style="text-align: right;">0.237</td>
+<td style="text-align: right;">0.035</td>
+<td style="text-align: right;">0.972</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">achievement_anxiety:reward_levellow_p70</td>
-<td style="text-align: right;">-0.003</td>
+<td style="text-align: right;">-0.004</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">-3.425</td>
+<td style="text-align: right;">-3.666</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p30</td>
+<td style="text-align: right;">0.002</td>
 <td style="text-align: right;">0.001</td>
+<td style="text-align: right;">1.899</td>
+<td style="text-align: right;">0.058</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">achievement_anxiety:reward_levellow_p30</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-2.126</td>
+<td style="text-align: right;">0.034</td>
 </tr>
 </tbody>
 </table>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>model_aa2 <span class="ot">&lt;-</span>  <span class="fu">lm</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  prop_press <span class="sc">~</span> achievement_anxiety <span class="sc">*</span> reward_level,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plot_data</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(model_aa) <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 52%">
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">0.994</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">55.453</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">achievement_anxiety</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.854</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reward_levellow_p100</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.661</td>
+<td style="text-align: right;">0.509</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reward_levelhigh_p70</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-0.080</td>
+<td style="text-align: right;">0.936</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reward_levellow_p70</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.220</td>
+<td style="text-align: right;">0.826</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reward_levelhigh_p30</td>
+<td style="text-align: right;">-0.103</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-4.077</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reward_levellow_p30</td>
+<td style="text-align: right;">-0.119</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-4.711</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">achievement_anxiety:reward_levellow_p100</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-2.126</td>
+<td style="text-align: right;">0.034</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p70</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.035</td>
+<td style="text-align: right;">0.972</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">achievement_anxiety:reward_levellow_p70</td>
+<td style="text-align: right;">-0.004</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-3.666</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">achievement_anxiety:reward_levelhigh_p30</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">1.899</td>
+<td style="text-align: right;">0.058</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">achievement_anxiety:reward_levellow_p30</td>
+<td style="text-align: right;">-0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-2.126</td>
+<td style="text-align: right;">0.034</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  mtq_scoring,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mtq_scoring.csv"</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </main>

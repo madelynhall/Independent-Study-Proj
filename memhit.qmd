@@ -57,7 +57,8 @@ memhit_task <- memhit_task |>
   )
 
 MTQ <- MTQ |>
-  mutate(participant = as.character(participant))
+  mutate(participant = as.character(participant)) |>
+  mutate(participant = str_remove(participant, "^0"))
 
 id_lookup <- bind_rows(
   id_mappings |>
@@ -126,7 +127,8 @@ merged_data <- merged_data |>
          rating_yellow,
          globalTrial,
          firstPressTime,
-         press_count
+         press_count,
+         press_threshold
          ) |>
   mutate(
   across(
@@ -139,6 +141,7 @@ merged_data <- merged_data |>
   )
 ) |>
   filter(!is.na(prolific_pid))
+  
 
 merged_data <- merged_data |>
   mutate(personal_mastery = QID6_20 + QID6_14 + QID6_39 + QID6_9 + 
@@ -146,7 +149,8 @@ merged_data <- merged_data |>
          competitive_excellence = QID6_41 + QID6_16 + QID6_29 + QID6_23 +
            QID6_35 + QID6_3 + QID6_4 + (6 - QID6_17) + QID6_10 + QID6_30 + (6 -   QID6_11) + (6 - QID6_24),
          achievement_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 + (6 - QID6_44) + (6 - QID6_12) +
-           QID6_47 + QID6_37 + QID6_49)
+           QID6_47 + QID6_37 + QID6_49,
+         mtq_total = achievement_anxiety + personal_mastery + competitive_excellence) 
 
 merged_data <- merged_data |>
   mutate(expCondition = na_if(expCondition, "")) |>
@@ -163,7 +167,26 @@ merged_data <- merged_data |>
       rewardType %in% "L" & rewardProb == 1 ~ "low_p100",
       rewardType %in% "H" & rewardProb == 1 ~ "high_p100",
     ))
+
+merged_data <- merged_data |>
+  group_by(prolific_pid) |>
+  mutate(
+    press_threshold = first(press_threshold[!is.na(press_threshold)])
+  ) |>
+  ungroup()
 ```
+
+```{r}
+mtq_scoring <- merged_data |>
+  select(personal_mastery,
+         competitive_excellence,
+         achievement_anxiety,
+         mtq_total,
+         prolific_pid) |>
+  distinct() |>
+  filter(!is.na(personal_mastery | competitive_excellence | achievement_anxiety))
+```
+
 
 ```{r}
 #| label: EDA
@@ -171,16 +194,15 @@ merged_data <- merged_data |>
 
 plot_data <- merged_data |>
   group_by(prolific_pid) |>
-  mutate(prop_press = as.numeric(press_count)/65) |>
+  mutate(prop_press = as.numeric(press_count)/as.numeric(press_threshold)) |>
   mutate(
     competitive_excellence = first(competitive_excellence),
     personal_mastery = first(personal_mastery),
     achievement_anxiety = first(achievement_anxiety)) |>
-  ungroup() |>
-  mutate(mtq_total = achievement_anxiety + personal_mastery + competitive_excellence)
+  ungroup() 
 
 #would be nice to stratify this by experimental group once we get more data
-plot_data |>
+plot_data <- plot_data |>
   filter(!is.na(reward_level)) |>
   mutate(
     reward_level = factor(
@@ -190,7 +212,9 @@ plot_data |>
         "high_p70",  "low_p70",
         "high_p30",  "low_p30"
       )
-    )) |>
+    ))
+
+plot_data |>
   ggplot(
     aes(
       x = personal_mastery,
@@ -222,34 +246,112 @@ plot_data |>
       high_p30 = "solid",
       low_p30 = "dashed"
     )
-  ) 
+  ) +
+  theme_bw()
 
 plot_data |>
-  filter(!is.na(reward_level)) |>
-  ggplot(aes(x = competitive_excellence, y = prop_press, color = reward_level)) +
+  ggplot(
+    aes(
+      x = competitive_excellence, 
+      y = prop_press,
+      group = reward_level,
+      color = reward_level,
+      linetype = reward_level
+    )
+  ) +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_color_discrete(
-    breaks = c("high_p100", "low_p100", "high_p70", 
-               "low_p70", "high_p30", "low_p30")
-  )
+  scale_color_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "blue",
+      low_p100 = "blue",
+      high_p70 = "green4",
+      low_p70 = "green4",
+      high_p30 = "goldenrod3",
+      low_p30 = "goldenrod3"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "solid",
+      low_p100 = "dashed",
+      high_p70 = "solid",
+      low_p70 = "dashed",
+      high_p30 = "solid",
+      low_p30 = "dashed"
+    )
+  ) +
+  theme_bw()
 
 plot_data |>
-  filter(!is.na(reward_level)) |>
-  ggplot(aes(x = achievement_anxiety, y = prop_press, color = reward_level)) +
+  ggplot(
+    aes(
+      x = achievement_anxiety, 
+      y = prop_press,
+      group = reward_level,
+      color = reward_level,
+      linetype = reward_level
+    )
+  ) +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_color_discrete(
-    breaks = c("high_p100", "low_p100", "high_p70", 
-               "low_p70", "high_p30", "low_p30")
-  )
-
+  scale_color_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "blue",
+      low_p100 = "blue",
+      high_p70 = "green4",
+      low_p70 = "green4",
+      high_p30 = "goldenrod3",
+      low_p30 = "goldenrod3"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "solid",
+      low_p100 = "dashed",
+      high_p70 = "solid",
+      low_p70 = "dashed",
+      high_p30 = "solid",
+      low_p30 = "dashed"
+    )
+  ) +
+  theme_bw()
 plot_data |>
-  filter(!is.na(reward_level)) |>
-  ggplot(aes(x = mtq_total, y = prop_press, color = reward_level)) +
+  ggplot(
+    aes(
+      x = mtq_total, 
+      y = prop_press,
+      group = reward_level,
+      color = reward_level,
+      linetype = reward_level
+    )
+  ) +
   geom_smooth(method = "lm", se = FALSE) +
-  scale_color_discrete(
-    breaks = c("high_p100", "low_p100", "high_p70", 
-               "low_p70", "high_p30", "low_p30")
-  )
+  scale_color_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "blue",
+      low_p100 = "blue",
+      high_p70 = "green4",
+      low_p70 = "green4",
+      high_p30 = "goldenrod3",
+      low_p30 = "goldenrod3"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "Reward level",
+    values = c(
+      high_p100 = "solid",
+      low_p100 = "dashed",
+      high_p70 = "solid",
+      low_p70 = "dashed",
+      high_p30 = "solid",
+      low_p30 = "dashed"
+    )
+  ) +
+  theme_bw()
 
 ```
 ```{r}
@@ -284,7 +386,11 @@ tidy(model_aa) |>
   kable(digits = 3)
 
 ```
-
 ```{r}
+write.csv(
+  mtq_scoring,
+  "mtq_scoring.csv",
+  row.names = FALSE
+)
 ```
 
