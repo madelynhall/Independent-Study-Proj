@@ -15,7 +15,7 @@ library(patchwork)
 library(tibble)
 library(broom)
 library(broom.mixed)
-library(lme4)
+library(lmerTest)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
@@ -72,7 +72,7 @@ id_lookup <- bind_rows(
       prolific_pid = prolific_pid
     )) 
 
-memhit_updated <- memhit_task |>
+memhit_task <- memhit_task |>
   mutate(participant = as.character(participant)) |>
   left_join(
     id_lookup,
@@ -83,7 +83,7 @@ memhit_updated <- memhit_task |>
   ) |>
   select(-participant)
 
-MTQ_updated <- MTQ |>
+MTQ <- MTQ |>
   mutate(participant = as.character(participant)) |>
   left_join(
     id_lookup,
@@ -95,8 +95,8 @@ MTQ_updated <- MTQ |>
   select(-participant)
 
 merged_data <- inner_join(
-  memhit_updated,
-  MTQ_updated,
+  memhit_task,
+  MTQ,
   by = "prolific_pid",
   suffix = c("_memhit", "_MTQ")
 )
@@ -150,7 +150,8 @@ merged_data <- merged_data |>
            QID6_35 + QID6_3 + QID6_4 + (6 - QID6_17) + QID6_10 + QID6_30 + (6 -   QID6_11) + (6 - QID6_24),
          achievement_anxiety = QID6_42 + QID6_50 + QID6_19 + QID6_48 + (6 - QID6_44) + (6 - QID6_12) +
            QID6_47 + QID6_37 + QID6_49,
-         mtq_total = achievement_anxiety + personal_mastery + competitive_excellence) 
+         mtq_total = achievement_anxiety + personal_mastery + competitive_excellence) |>
+  filter(!is.na(personal_mastery | competitive_excellence | achievement_anxiety))
 
 merged_data <- merged_data |>
   mutate(expCondition = na_if(expCondition, "")) |>
@@ -192,17 +193,14 @@ mtq_scoring <- merged_data |>
 #| label: EDA
 #| warning: FALSE
 
-plot_data <- merged_data |>
+merged_data <- merged_data |>
   group_by(prolific_pid) |>
   mutate(prop_press = as.numeric(press_count)/as.numeric(press_threshold)) |>
   mutate(
     competitive_excellence = first(competitive_excellence),
     personal_mastery = first(personal_mastery),
     achievement_anxiety = first(achievement_anxiety)) |>
-  ungroup() 
-
-#would be nice to stratify this by experimental group once we get more data
-plot_data <- plot_data |>
+  ungroup() |>
   filter(!is.na(reward_level)) |>
   mutate(
     reward_level = factor(
@@ -214,7 +212,10 @@ plot_data <- plot_data |>
       )
     ))
 
-plot_data |>
+#would be nice to stratify this by experimental group once we get more data...
+#add facet_wrap(~expCondition) to all plot when you want to stratify 
+
+merged_data |>
   ggplot(
     aes(
       x = personal_mastery,
@@ -234,8 +235,7 @@ plot_data |>
       low_p70 = "green4",
       high_p30 = "goldenrod3",
       low_p30 = "goldenrod3"
-    )
-  ) +
+    )) +
   scale_linetype_manual(
     name = "Reward level",
     values = c(
@@ -249,7 +249,7 @@ plot_data |>
   ) +
   theme_bw()
 
-plot_data |>
+merged_data |>
   ggplot(
     aes(
       x = competitive_excellence, 
@@ -284,7 +284,7 @@ plot_data |>
   ) +
   theme_bw()
 
-plot_data |>
+merged_data |>
   ggplot(
     aes(
       x = achievement_anxiety, 
@@ -318,7 +318,8 @@ plot_data |>
     )
   ) +
   theme_bw()
-plot_data |>
+
+merged_data |>
   ggplot(
     aes(
       x = mtq_total, 
@@ -356,41 +357,112 @@ plot_data |>
 ```
 ```{r}
 #| label: significance
+#| warning: FALSE
 
-model_ce <-  lm(
-  prop_press ~ competitive_excellence * reward_level,
-  data = plot_data
-)
-tidy(model_ce) |>
-  kable(digits = 3)
+merged_data <- merged_data |>
+  mutate(
+    competitive_excellence_z =
+      as.numeric(scale(competitive_excellence)),
+    personal_mastery_z =
+      as.numeric(scale(personal_mastery)),
+    achievement_anxiety_z =
+      as.numeric(scale(achievement_anxiety))
+  )
 
-model_pm <-  lm(
-  prop_press ~ personal_mastery * reward_level,
-  data = plot_data
-)
-tidy(model_pm) |>
-  kable(digits = 3)
+# COMPETITIVE EXCELLENCE
+model_ce <-  lmer(
+  prop_press ~ competitive_excellence * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
 
-model_aa <-  lm(
-  prop_press ~ achievement_anxiety * reward_level,
-  data = plot_data
-)
-tidy(model_aa) |>
-  kable(digits = 3)
+ tidy_model_ce <- tidy(
+  model_ce,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+  tidy_model_ce  |>
+    kable(digits = 3)
 
-model_aa2 <-  lm(
-  prop_press ~ achievement_anxiety * reward_level,
-  data = plot_data
-)
-tidy(model_aa) |>
-  kable(digits = 3)
+model_ce2 <-  lmer(
+  prop_press ~ competitive_excellence_z * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
+
+ tidy_model_ce2 <- tidy(
+  model_ce2,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+  tidy_model_ce2  |>
+    kable(digits = 3)
+
+#PERSONAL MASTERY
+model_pm <-  lmer(
+  prop_press ~ personal_mastery * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
+
+ tidy_model_pm <- tidy(
+  model_pm,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+tidy_model_pm  |>
+    kable(digits = 3)
+
+model_pm2 <-  lmer(
+  prop_press ~ personal_mastery_z * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
+
+ tidy_model_pm2 <- tidy(
+  model_pm2,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+  tidy_model_pm2  |>
+    kable(digits = 3)
+
+
+#ACHIEVEMENT ANXIETY
+model_aa <-  lmer(
+  prop_press ~ achievement_anxiety * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
+
+ tidy_model_aa <- tidy(
+  model_aa,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+  tidy_model_aa  |>
+    kable(digits = 3)
+
+model_aa2 <-  lmer(
+  prop_press ~ achievement_anxiety_z * reward_level +
+    (1 | prolific_pid),
+  data = merged_data) 
+
+ tidy_model_aa2 <- tidy(
+  model_aa2,
+  effects = "fixed",
+  conf.int = TRUE
+) |>
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
+ 
+  tidy_model_aa2  |>
+    kable(digits = 3)
 
 ```
-```{r}
-write.csv(
-  mtq_scoring,
-  "mtq_scoring.csv",
-  row.names = FALSE
-)
-```
+
 
