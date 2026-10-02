@@ -17,11 +17,12 @@ library(broom)
 library(broom.mixed)
 library(lmerTest)
 library(ggcorrplot)
+library(readr)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
   "Desktop",
-  "data 2"
+  "memHit_Updated"
 )
 
 csv_files <- list.files(
@@ -38,70 +39,40 @@ memhit_task <- map_dfr(
 )
 
 MTQ <- read_csv(
-  file.path(Sys.getenv("HOME"), "Desktop", "MTQ.csv")
-)
+  file.path(Sys.getenv("HOME"), "Desktop", "MTQ_Updated.csv")
+) 
 
-id_mappings <- read_csv(
-  file.path(Sys.getenv("HOME"), "Desktop", "id_mappings_recent.csv")
-)
+id_mappings <- readr::read_csv("id_mappings")
 
-# Ensure all ID columns are character
+memhit_task <- memhit_task |>
+  mutate(prolific_pid = as.character(participant))
+
+MTQ <- MTQ |>
+  filter(!is.na(participant)) |>
+  mutate(prolific_pid = as.character(participant),
+         prolific_pid = sub("^0", "", prolific_pid))
+
+
 id_mappings <- id_mappings |>
   mutate(
     participant_id = as.character(participant_id),
     prolific_pid = as.character(prolific_pid)
   )
 
-memhit_task <- memhit_task |>
-  mutate(
-    participant = as.character(participant)
-  )
 
-MTQ <- MTQ |>
-  mutate(participant = as.character(participant)) |>
-  mutate(participant = str_remove(participant, "^0"))
+fix_ids <- function(x) {
+  mapping_row <- match(x, id_mappings$participant_id)
+  matched <- !is.na(mapping_row)
 
-id_lookup <- bind_rows(
-  id_mappings |>
-    transmute(
-      original_id = participant_id,
-      prolific_pid = prolific_pid
-    ),
-  id_mappings |>
-    transmute(
-      original_id = prolific_pid,
-      prolific_pid = prolific_pid
-    )) 
+  x[matched] <- id_mappings$prolific_pid[mapping_row[matched]]
 
-memhit_task <- memhit_task |>
-  mutate(participant = as.character(participant)) |>
-  left_join(
-    id_lookup,
-    by = c("participant" = "original_id")
-  ) |>
-  mutate(
-    prolific_pid = coalesce(prolific_pid, participant)
-  ) |>
-  select(-participant)
+  return(x)
+}
 
-MTQ <- MTQ |>
-  mutate(participant = as.character(participant)) |>
-  left_join(
-    id_lookup,
-    by = c("participant" = "original_id")
-  ) |>
-  mutate(
-    prolific_pid = coalesce(prolific_pid, participant)
-  ) |>
-  select(-participant)
+MTQ$prolific_pid <- fix_ids(MTQ$prolific_pid)
 
-merged_data <- inner_join(
-  memhit_task,
-  MTQ,
-  by = "prolific_pid",
-  suffix = c("_memhit", "_MTQ")
-)
-
+merged_data <- memhit_task |>
+  inner_join(MTQ, by = "prolific_pid")
 ```
 
 ```{r}
