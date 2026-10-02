@@ -100,7 +100,7 @@ merged_data <- merged_data |>
          globalTrial,
          firstPressTime,
          press_count,
-         press_threshold
+         active_press_threshold
          ) |>
   mutate(
   across(
@@ -144,7 +144,7 @@ merged_data <- merged_data |>
 merged_data <- merged_data |>
   group_by(prolific_pid) |>
   mutate(
-    press_threshold = first(press_threshold[!is.na(press_threshold)])
+    active_active_press_threshold = first(active_press_threshold[!is.na(active_press_threshold)])
   ) |>
   ungroup()
 ```
@@ -167,7 +167,7 @@ mtq_scoring <- merged_data |>
 
 merged_data <- merged_data |>
   group_by(prolific_pid) |>
-  mutate(prop_press = as.numeric(press_count)/as.numeric(press_threshold)) |>
+  mutate(prop_press = as.numeric(press_count)/as.numeric(active_press_threshold)) |>
   mutate(
     competitive_excellence = first(competitive_excellence),
     personal_mastery = first(personal_mastery),
@@ -183,6 +183,16 @@ merged_data <- merged_data |>
         "high_p30",  "low_p30"
       )
     ))
+
+merged_data <- merged_data |>
+  mutate(
+    competitive_excellence_z =
+      as.numeric(scale(competitive_excellence)),
+    personal_mastery_z =
+      as.numeric(scale(personal_mastery)),
+    achievement_anxiety_z =
+      as.numeric(scale(achievement_anxiety))
+  )
 
 #would be nice to stratify this by experimental group once we get more data...
 #add facet_wrap(~expCondition) to all plot when you want to stratify 
@@ -225,26 +235,16 @@ plot(personal_mastery)
 plot(competitive_excellence)
 plot(achievement_anxiety)
 
-
-
 ```
 ```{r}
 #| label: significance
 #| warning: FALSE
 
-merged_data <- merged_data |>
-  mutate(
-    competitive_excellence_z =
-      as.numeric(scale(competitive_excellence)),
-    personal_mastery_z =
-      as.numeric(scale(personal_mastery)),
-    achievement_anxiety_z =
-      as.numeric(scale(achievement_anxiety))
-  )
 
 # COMPETITIVE EXCELLENCE
+
 model_ce <-  lmer(
-  prop_press ~ competitive_excellence * reward_level +
+  prop_press ~ competitive_excellence_z * reward_level +
     (1 | prolific_pid),
   data = merged_data) 
 
@@ -258,24 +258,10 @@ model_ce <-  lmer(
   tidy_model_ce  |>
     kable(digits = 3)
 
-model_ce2 <-  lmer(
-  prop_press ~ competitive_excellence_z * reward_level +
-    (1 | prolific_pid),
-  data = merged_data) 
-
- tidy_model_ce2 <- tidy(
-  model_ce2,
-  effects = "fixed",
-  conf.int = TRUE
-) |>
-  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
- 
-  tidy_model_ce2  |>
-    kable(digits = 3)
-
 #PERSONAL MASTERY
+
 model_pm <-  lmer(
-  prop_press ~ personal_mastery * reward_level +
+  prop_press ~ personal_mastery_z * reward_level +
     (1 | prolific_pid),
   data = merged_data) 
 
@@ -286,28 +272,14 @@ model_pm <-  lmer(
 ) |>
   select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
  
-tidy_model_pm  |>
-    kable(digits = 3)
-
-model_pm2 <-  lmer(
-  prop_press ~ personal_mastery_z * reward_level +
-    (1 | prolific_pid),
-  data = merged_data) 
-
- tidy_model_pm2 <- tidy(
-  model_pm2,
-  effects = "fixed",
-  conf.int = TRUE
-) |>
-  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
- 
-  tidy_model_pm2  |>
+  tidy_model_pm  |>
     kable(digits = 3)
 
 
 #ACHIEVEMENT ANXIETY
+
 model_aa <-  lmer(
-  prop_press ~ achievement_anxiety * reward_level +
+  prop_press ~ achievement_anxiety_z * reward_level +
     (1 | prolific_pid),
   data = merged_data) 
 
@@ -321,21 +293,34 @@ model_aa <-  lmer(
   tidy_model_aa  |>
     kable(digits = 3)
 
-model_aa2 <-  lmer(
-  prop_press ~ achievement_anxiety_z * reward_level +
-    (1 | prolific_pid),
-  data = merged_data) 
+#acounting for active_press_threshold
+merged_data <- merged_data |>
+  mutate(active_press_threshold = as.numeric(active_press_threshold))
 
- tidy_model_aa2 <- tidy(
-  model_aa2,
+threshold_model <- lm(
+  active_press_threshold ~ personal_mastery + competitive_excellence + achievement_anxiety,
+  data = merged_data
+)
+
+tidy(threshold_model) |>
+    kable(digits = 3)
+
+adjusted_model_pm <- lmer(
+  prop_press ~ personal_mastery * reward_level +
+    active_press_threshold  +
+    (1 | prolific_pid),
+  data = merged_data
+)
+
+tidy_adjusted_pm <- tidy(
+  adjusted_model_pm,
   effects = "fixed",
   conf.int = TRUE
 ) |>
   select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
  
-  tidy_model_aa2  |>
+  tidy_adjusted_pm  |>
     kable(digits = 3)
-
 ```
 
 ```{r}
