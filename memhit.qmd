@@ -18,10 +18,12 @@ library(broom.mixed)
 library(lmerTest)
 library(ggcorrplot)
 library(readr)
+library(kableExtra)
 
 data_folder <- file.path(
   Sys.getenv("HOME"),
   "Desktop",
+  "Independent Study Data",
   "memHit_Updated"
 )
 
@@ -39,7 +41,7 @@ memhit_task <- map_dfr(
 )
 
 MTQ <- read_csv(
-  file.path(Sys.getenv("HOME"), "Desktop", "MTQ_Updated.csv")
+  file.path(Sys.getenv("HOME"), "Desktop", "Independent Study Data", "MTQ_Updated.csv")
 ) 
 
 id_mappings <- readr::read_csv("id_mappings")
@@ -141,12 +143,7 @@ merged_data <- merged_data |>
       rewardType %in% "H" & rewardProb == 1 ~ "high_p100",
     ))
 
-merged_data <- merged_data |>
-  group_by(prolific_pid) |>
-  mutate(
-    active_active_press_threshold = first(active_press_threshold[!is.na(active_press_threshold)])
-  ) |>
-  ungroup()
+
 ```
 
 ```{r}
@@ -191,7 +188,11 @@ merged_data <- merged_data |>
     personal_mastery_z =
       as.numeric(scale(personal_mastery)),
     achievement_anxiety_z =
-      as.numeric(scale(achievement_anxiety))
+      as.numeric(scale(achievement_anxiety)),
+    mtq_total_z = 
+      as.numeric(scale(mtq_total)),
+    active_press_threshold_z =
+      as.numeric(scale(as.numeric(active_press_threshold)))
   )
 
 #would be nice to stratify this by experimental group once we get more data...
@@ -294,47 +295,55 @@ model_aa <-  lmer(
     kable(digits = 3)
 
 #acounting for active_press_threshold
-merged_data <- merged_data |>
-  mutate(active_press_threshold = as.numeric(active_press_threshold))
+  
+adjusted_model_mtq_total <- lmer(
+  prop_press ~ mtq_total_z * reward_level +
+    active_press_threshold_z + 
+    (1 | prolific_pid), data = merged_data)
 
-threshold_model <- lm(
-  active_press_threshold ~ personal_mastery + competitive_excellence + achievement_anxiety,
-  data = merged_data
-)
-
-tidy(threshold_model) |>
-    kable(digits = 3)
-
-adjusted_model_pm <- lmer(
-  prop_press ~ personal_mastery * reward_level +
-    active_press_threshold  +
-    (1 | prolific_pid),
-  data = merged_data
-)
-
-tidy_adjusted_pm <- tidy(
-  adjusted_model_pm,
+tidy_adjusted_mtq_total <- tidy(
+  adjusted_model_mtq_total,
   effects = "fixed",
   conf.int = TRUE
 ) |>
   select(term, estimate, std.error, statistic, p.value, conf.low, conf.high)
  
-  tidy_adjusted_pm  |>
+tidy_adjusted_mtq_total  |>
     kable(digits = 3)
+
+threshold_row <- which(
+  tidy_adjusted_mtq_total$term == "active_press_threshold_z"
+)
+
+tidy_adjusted_mtq_total |>
+  kable(digits = 3) |>
+  row_spec(
+    row = threshold_row,
+    bold = TRUE,
+    background = "#FFF2CC"
+  )
+
+
 ```
 
 ```{r}
 #| label: correlation-matrix
 
-trait_cor <- mtq_scoring |>
+trait_cor <- merged_data |>
   select(
     prolific_pid,
-    competitive_excellence,
-    personal_mastery,
-    achievement_anxiety
+    competitive_excellence_z,
+    personal_mastery_z,
+    achievement_anxiety_z
   ) |>
   distinct(prolific_pid, .keep_all = TRUE) |>
   select(-prolific_pid)
+
+trait_complete <- trait_cor[complete.cases(trait_cor), ]
+
+p_matrix_mtq <- cor_pmat(trait_complete)
+p_matrix_mtq
+
 
 corr_matrix_mtq <- cor(trait_cor, use = "complete.obs")
 
@@ -342,8 +351,5 @@ ggcorrplot(corr_matrix_mtq,
            lab = TRUE,
            colors = c("#efefef", "#9f9f9f", "#5f5f5f"),
            ggtheme = theme_minimal())
-
-
-#scale scores
 ```
 
